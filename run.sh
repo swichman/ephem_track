@@ -3,6 +3,7 @@
 qt_check="python -c \"import PyQt4\" &>/dev/null"
 ephem_check="python -c \"import ephem\" &>/dev/null"
 urllib_check="python -c \"import urllib\" &>/dev/null"
+pathlib_check="python -c \"import pathlib\" &>/dev/null"
 count=0
 
 if ! eval $qt_check
@@ -20,6 +21,12 @@ fi
 if ! eval $urllib_check
 then
     echo "urllib needs to be installed"
+    ((count++))
+fi
+
+if ! eval $pathlib_check
+then
+    echo "pathlib needs to be installed"
     ((count++))
 fi
 
