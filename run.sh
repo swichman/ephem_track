@@ -32,6 +32,6 @@ fi
 
 if [ $count -eq 0 ]
 then
-    python main.py &
+    python ephem_track.py &
 fi
 
