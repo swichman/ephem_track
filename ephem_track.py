@@ -93,7 +93,7 @@ class MyWindow(QtGui.QMainWindow):
         duration = (self.next_contact[4] - self.next_contact[0]) * 86400
         self.time_till = (self.next_contact[0] - ephem.now()) * 86400
         self.timer.timeout.connect(self.till_rise)
-        self.LogTextEdit.setText("Next pass at %s UTC" % self.next_contact[0] + " with a duration of %d" % duration + " seconds.\nRise Az: %.3f" % (self.next_contact[1] * degrees_per_radian) + "\nFade Az: %.3f" % (self.next_contact[5] * degrees_per_radian) + "\nMax El: %.3f" % (self.next_contact[3] * degrees_per_radian))
+        self.LogTextEdit.setText("Next pass for " + self.SatelliteList.currentItem().text() + " at %s UTC" % self.next_contact[0] + " with a duration of %d" % duration + " seconds.\nRise Az: %.3f" % (self.next_contact[1] * degrees_per_radian) + "\nFade Az: %.3f" % (self.next_contact[5] * degrees_per_radian) + "\nMax El: %.3f" % (self.next_contact[3] * degrees_per_radian))
 
     def till_rise(self):
         self.time_till = (self.next_contact[0] - ephem.now()) * 86400
