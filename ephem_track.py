@@ -18,10 +18,10 @@ class MyWindow(QtGui.QMainWindow):
     LocalLon = '-106.629355'
     LocalAlt = 1620 # meters
 
-    #########################################
-    #   Nothing needs to be changed         #
-    #           below this                  #
-    #########################################
+################################################################
+#       Nothing needs to be changed                            #
+#               below this                                     #
+################################################################
     
     #########################################
     #   Initialize the window               #
