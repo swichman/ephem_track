@@ -34,7 +34,7 @@ class MyWindow(QtGui.QMainWindow):
         self.timer = QtCore.QTimer(self)
         # connect objects to signals
         self.FamilyList.currentItemChanged.connect(self.file_check)
-        self.SatelliteList.currentItemChanged.connect(self.show_tle)
+        self.SatelliteList.itemClicked.connect(self.show_tle)
         self.UpdateTleButton.clicked.connect(self.get_tle)
         self.TrackButton.clicked.connect(self.calc_rise)
         self.timer.timeout.connect(self.disp_time)
@@ -73,24 +73,28 @@ class MyWindow(QtGui.QMainWindow):
     #   Populate Family to Satellite list   #
     #########################################
     def parse_tle(self):
-        tle_file = str('./resources/tle/' + self.FamilyList.currentItem().text() + "_tlefile.txt")
         self.SatelliteList.clear()
+        tle_file = str('./resources/tle/' + self.FamilyList.currentItem().text() + "_tlefile.txt")
         global tle1
         global tle2
         tle1 = []
         tle2 = []
-        i = 0
+        i = 1
+        # use modulo to check while line of TLE is being read
         with open(tle_file) as tlefile:
             for line in tlefile:
-                #if ( line[:1] != '1' ) and ( line[:1] != '2' ):
-                if '1 ' not in line and '2 ' not in line:
-                    self.SatelliteList.addItem(line.rstrip())
-                if line[:1] is '1':
+                if (i % 3 == 1):
+                    if i is 1:
+                        self.SatelliteList.insertItem(0, line.rstrip())
+                    else:
+                        self.SatelliteList.addItem(line.rstrip())
+                if (i % 3 == 2):
                     tle1.append(line)
-                if line[:1] is '2':
+                if (i % 3 == 0):
                     tle2.append(line)
-                #i = i + 1
-        self.SatelliteList.setCurrentItem(self.SatelliteList.item(0))
+                i = i + 1
+        self.SatelliteList.setCurrentRow(0)
+        #print(self.SatelliteList.currentItem().text())
         self.show_tle()
 
     #########################################
@@ -104,7 +108,8 @@ class MyWindow(QtGui.QMainWindow):
         line2 = tle1[self.SatelliteList.currentRow()]
         line3 = tle2[self.SatelliteList.currentRow()]
         tle = line2 + line3
-        self.TleTextEdit.setText(spacer + pre_space + line1 + spacer + '\n' + tle.rstrip())
+        self.TleTextEdit.setText(spacer + pre_space + self.SatelliteList.currentItem().text() + '\n' + spacer + '\n' + tle.rstrip())
+        self.calc_rise()
 
     #########################################
     #   Set local and UTC clocks            #
@@ -121,13 +126,18 @@ class MyWindow(QtGui.QMainWindow):
     def calc_rise(self):
         # define degrees
         degrees_per_radian = 180.0 / math.pi
+
+        # build ground location
         home = ephem.Observer()
         home.lon = self.LocalLon
         home.lat = self.LocalLat
         home.elevation = self.LocalAlt
-
+        
+        # build target body
         target = ephem.readtle(str(self.SatelliteList.currentItem().text()), tle1[self.SatelliteList.currentRow()], tle2[self.SatelliteList.currentRow()])
         home.date = datetime.utcnow()
+
+        # get next pass observed by ground location
         self.next_contact = home.next_pass(target)
         target.compute(home)
 
@@ -149,7 +159,7 @@ class MyWindow(QtGui.QMainWindow):
         duration = (self.next_contact[4] - self.next_contact[0]) * 86400
         self.time_till = (self.next_contact[0] - ephem.now()) * 86400
         self.timer.timeout.connect(self.till_rise)
-        self.LogTextEdit.setText("Next pass for " + self.SatelliteList.currentItem().text() + " at %s UTC" % self.next_contact[0] + " with a duration of %d" % duration + " seconds.\nRise Az: %.3f" % (self.next_contact[1] * degrees_per_radian) + "\nFade Az: %.3f" % (self.next_contact[5] * degrees_per_radian) + "\nMax El: %.3f" % (self.next_contact[3] * degrees_per_radian))
+        #self.LogTextEdit.setText("Next pass for " + self.SatelliteList.currentItem().text() + " at %s UTC" % self.next_contact[0] + " with a duration of %d" % duration + " seconds.\nRise Az: %.3f" % (self.next_contact[1] * degrees_per_radian) + "\nFade Az: %.3f" % (self.next_contact[5] * degrees_per_radian) + "\nMax El: %.3f" % (self.next_contact[3] * degrees_per_radian))
 
     #########################################
     #   calculate time till next pass       #
